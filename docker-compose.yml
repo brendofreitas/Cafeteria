@@ -1,0 +1,63 @@
+﻿version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: cafe-postgres
+    environment:
+      POSTGRES_DB: cafe_db
+      POSTGRES_USER: cafe_user
+      POSTGRES_PASSWORD: cafe_password
+    ports:
+      - "5432:5432"
+    mem_limit: 512m
+    cpus: 1
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "cafe_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    hostname: cafe-postgres
+    restart: always
+
+
+  adminer:
+    image: adminer:latest
+    container_name: cafe-adminer
+    ports:
+      - "8080:8080"
+    mem_limit: 256m
+
+  loki:
+    image: grafana/loki:latest
+    container_name: cafe-loki
+    volumes:
+      - ./loki-config.yml:/etc/loki/local-config.yml
+    ports:
+      - "3100:3100"
+    mem_limit: 256m
+
+
+  jaeger:
+    image: jaegertracing/opentelemetry-all-in-one:latest
+    container_name: cafe-jaeger
+    ports:
+      - "13133:13133"
+      - "16686:16686"
+      - "4317:4317"
+    mem_limit: 256m
+    restart: always
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: cafe-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    mem_limit: 256m
