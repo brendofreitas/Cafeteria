@@ -25,6 +25,7 @@ namespace Cafeteria.Controllers
                 if (id > 0)
                 {
                     var cafe = _repositorio.ObterPorId(id);
+                    _logger.LogError("Erro testes","erro");
                     return Ok(cafe);
                 }
                 else

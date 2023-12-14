@@ -12,16 +12,6 @@ using Npgsql;
 var builder = WebApplication.CreateBuilder(args);
 
 
-//builder.Services.AddOpenTelemetryTracing(b =>
-//{
-//    b.SetResourceBuilder(
-//        ResourceBuilder.CreateDefault().AddService(builder.Environment.ApplicationName))
-//     .AddAspNetCoreInstrumentation()
-//     .AddHttpClientInstrumentation()
-//     .AddOtlpExporter(opts => { opts.Endpoint = new Uri("http://localhost:4317"); });
-//});
-
-
 var tracingOtlpEndpoint = new Uri("http://localhost:4317");
 var otel = builder.Services.AddOpenTelemetry();
 
@@ -52,6 +42,7 @@ otel.WithTracing(tracing =>
 });
 
 Log.Logger = new LoggerConfiguration()
+    .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day)
     .WriteTo.PostgreSQL(builder.Configuration.GetConnectionString("DefaultConnection"), "Logs", needAutoCreateTable: true)
     .MinimumLevel.Error()
     .MinimumLevel.Warning()
@@ -65,6 +56,18 @@ Log.Logger = new LoggerConfiguration()
 builder.Services.AddLogging(loggingBuilder =>
 {
     loggingBuilder.AddSerilog();
+});
+
+
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ConfigureEndpointDefaults(listenOptions =>
+    {
+        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1;
+        listenOptions.UseConnectionLogging();
+        listenOptions.IPEndPoint.Port = 5243;
+    });
 });
 
 
@@ -98,11 +101,12 @@ app.UseAuthorization();
 
 
 
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ContextoBanco>();
-    dbContext.Database.Migrate();
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var dbContext = scope.ServiceProvider.GetRequiredService<ContextoBanco>();
+//    dbContext.Database.Migrate();
+//}
+
 
 
 app.MapPrometheusScrapingEndpoint();

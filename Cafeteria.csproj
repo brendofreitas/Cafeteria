@@ -4,6 +4,7 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>beb3d2d5-f31e-4fc4-9f60-7b5bc71451ee</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -25,6 +26,7 @@
 		<PackageReference Include="OpenTelemetry" Version="1.7.0" />
 		<PackageReference Include="Serilog" Version="3.1.1" />
 		<PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
 		<PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.2.0" />
 		<PackageReference Include="Serilog.Sinks.PostgreSQL" Version="2.3.0" />
 
