@@ -8,12 +8,14 @@ namespace Cafeteria.Controllers
     public class CafeController : Controller
     {
         private IRepositorio<Cafe> _repositorio;
+        private Instrumentor _instrumentor;
 
         private ILogger<CafeController> _logger;
-        public CafeController(IRepositorio<Cafe> repositorio, ILogger<CafeController> logger)
+        public CafeController(IRepositorio<Cafe> repositorio, ILogger<CafeController> logger, Instrumentor instrumentor)
         {
             _repositorio = repositorio;
             _logger = logger;
+            _instrumentor = instrumentor;
         }
 
 
@@ -25,7 +27,13 @@ namespace Cafeteria.Controllers
                 if (id > 0)
                 {
                     var cafe = _repositorio.ObterPorId(id);
-                    _logger.LogError("Erro testes","erro");
+                    _logger.LogError("Erro testes", "erro");
+                    _logger.LogInformation("teste informacao", "erro");
+
+                    _instrumentor.IncomingRequestCounter.Add(1,
+                       new KeyValuePair<string, object?>("operation", "ObterPorId"),
+                       new KeyValuePair<string, object?>("controller", nameof(CafeController)));
+
                     return Ok(cafe);
                 }
                 else
@@ -52,6 +60,13 @@ namespace Cafeteria.Controllers
                 else
                 {
                     _repositorio.Adicionar(cafe);
+
+                    _logger.LogInformation("Café adicionado com sucesso: {@Cafe}", cafe);
+
+                    _instrumentor.IncomingRequestCounter.Add(1,
+                     new KeyValuePair<string, object?>("operation", "Criar"),
+                     new KeyValuePair<string, object?>("controller", nameof(CafeController)));
+
                     return Created($"/cafe/{cafe.id}", cafe);
                 }
             }
@@ -106,6 +121,6 @@ namespace Cafeteria.Controllers
                 return BadRequest();
             }
         }
-      
+
     }
 }
